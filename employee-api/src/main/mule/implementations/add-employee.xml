@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<sub-flow name="add-employeeSub_Flow" doc:id="2e790883-87f8-4d3e-8b19-c1b33a7a2690" >
+		<logger level="INFO" doc:name="Logger" doc:id="7f876859-c36c-41f7-a1b5-0cc691393c81" message="data from source: #[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="b1054935-ac43-436b-800d-8744ed592f13" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:insert doc:name="Insert" doc:id="07a17de2-6347-482f-8116-5195a88b877f" config-ref="Database_Config">
+			<db:sql ><![CDATA[insert into emp(empid,empname,empstatus) values(:empid, :empname, :empstatus)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+ empid: payload.empid,
+ empname: payload.empname,
+ empstatus: payload.empstatus
+ }]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="d0bd7b01-4689-4ac1-b94b-90b6b25521fb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  status: 200,
+  message: "Success"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>

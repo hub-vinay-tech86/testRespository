@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="employeeinputjson" format="json">
+      <types:shape format="weave" example="examples/employee.json"><![CDATA[%dw 2.0
+
+type employeeinputjson = Array<{|  empid: Number {"typeId": "int"},   empname: String,   empstatus: String|}> {"example": "[{\\\"empid\\\":100,\\\"empname\\\":\\\"Vinay\\\",\\\"empstatus\\\":\\\"A\\\"},{\\\"empid\\\":101,\\\"empname\\\":\\\"Reena\\\",\\\"empstatus\\\":\\\"A\\\"},{\\\"empid\\\":102,\\\"empname\\\":\\\"Alain\\\",\\\"empstatus\\\":\\\"I\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="inputxml" format="xml">
+      <types:example format="xml" element="emp" location="examples/employee.xml"/>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#933fb71f-2c03-4796-bfed-ca188ce1e349">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="employeeinputjson"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#b1054935-ac43-436b-800d-8744ed592f13">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="employeeinputjson"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#adba0742-d667-4d19-ae28-e976ee2fe74c">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="inputxml"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="inputxml"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

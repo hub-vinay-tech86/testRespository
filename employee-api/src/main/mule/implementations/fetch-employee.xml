@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<flow name="fetch-employeeFlow" doc:id="adab6bc7-d2d5-4f94-b476-983016daa243" >
+		<validation:is-number numberType="INTEGER" doc:name="Is number" doc:id="507fd237-047e-4ff1-a2ec-1b077c3aa845" value="#[attributes.queryParams.empid]" message="empid not found" />
+		<db:select doc:name="Select" doc:id="485f592a-2eb1-4385-8f41-dc5ff2e61f54" config-ref="Database_Config1">
+			<db:sql><![CDATA[select * from emp where empid= :empid and empstatus= :empstatus]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+   empid: attributes.queryParams.empid,
+   empstatus: attributes.queryParams.empstatus
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="933fb71f-2c03-4796-bfed-ca188ce1e349">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	empid: payload01.empid,
+	empname: payload01.empname,
+	empstatus: payload01.empstatus
+}
+  ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="6a20f120-5def-455f-a362-da7e21651519" message="Records fetched from database: #[payload]" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="ca8e9450-3ebe-4fb4-a198-390ceb119bfb" type="VALIDATION:INVALID_NUMBER">
+				<ee:transform doc:name="Transform Message" doc:id="eb7ea604-40c5-49f9-86bc-457e2d5e5239" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"status": 404,
+	"message": error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>
